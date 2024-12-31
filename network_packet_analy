@@ -1,0 +1,34 @@
+import scapy.all as scapy
+
+def packet_callback(packet):
+    if packet.haslayer(scapy.IP):
+        src_ip = packet[scapy.IP].src
+        dst_ip = packet[scapy.IP].dst
+        protocol = packet[scapy.IP].proto
+        print(f"Source IP: {src_ip} | Destination IP: {dst_ip} | Protocol: {protocol}")
+
+        if packet.haslayer(scapy.TCP):
+            if packet.haslayer(scapy.Raw):
+                try:
+                    payload = packet[scapy.Raw].load
+                    decoded_payload = payload.decode('utf-8', 'ignore')
+                    print(f"TCP Payload: {decoded_payload}")
+                except UnicodeDecodeError:
+                    print("Unable to decode TCP payload.")
+
+        elif packet.haslayer(scapy.UDP):
+            if packet.haslayer(scapy.Raw):
+                try:
+                    payload = packet[scapy.Raw].load
+                    decoded_payload = payload.decode('utf-8', 'ignore')
+                    print(f"UDP Payload: {decoded_payload}")
+                except UnicodeDecodeError:
+                    print("Unable to decode UDP payload.")
+
+def start_sniffing():
+    print("Starting packet sniffing... Press Ctrl+C to stop.")
+    scapy.sniff(store=False, prn=packet_callback, iface="Wi-Fi")  # Replace "your_interface_name"
+
+# Start the sniffing process
+if __name__ == "__main__":
+    start_sniffing()
